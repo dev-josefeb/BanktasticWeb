@@ -32,6 +32,13 @@ const imgObserver = new IntersectionObserver(loadImages, {
   threshold: 0,
   rootMargin: '200px',
 });
+
+const slides = document.querySelectorAll('.slide');
+const btnLeft = document.querySelector('.slider__btn--left');
+const btnRight = document.querySelector('.slider__btn--right');
+const dotContainer = document.querySelector('.dots');
+const maxSlides = slides.length;
+let currentSlide = 0;
 // #EndRegion Constants
 
 // #Region Event Listeners
@@ -46,6 +53,19 @@ document
   .querySelector('.nav__links')
   .addEventListener('click', scrollLinksIntoView);
 tabsContainer.addEventListener('click', switchTabs);
+btnRight.addEventListener('click', nextSlide);
+btnLeft.addEventListener('click', prevSlide);
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'ArrowLeft') prevSlide();
+  if (e.key === 'ArrowRight') nextSlide();
+});
+dotContainer.addEventListener('click', function (e) {
+  if (e.target.classList.contains('dots__dot')) {
+    currentSlide = +e.target.dataset.slide;
+    goToSlide(currentSlide);
+    activateDot(currentSlide);
+  }
+});
 // #EndRegion Event Listeners
 
 // #Region Methods
@@ -57,6 +77,8 @@ allSections.forEach(section => {
 });
 
 imgTargets.forEach(img => imgObserver.observe(img));
+
+initialiseSlider();
 // #EndRegion Methods
 
 // #Region Functions
@@ -147,3 +169,50 @@ function loadImages(entries, observer) {
   observer.unobserve(entry.target);
 }
 // #EndRegion Functions
+
+function initialiseSlider() {
+  goToSlide(0);
+  createDots();
+  activateDot(0);
+}
+
+function activateDot(slide) {
+  document
+    .querySelectorAll('.dots__dot')
+    .forEach(dot => dot.classList.remove('dots__dot--active'));
+
+  document
+    .querySelector(`.dots__dot[data-slide="${slide}"]`)
+    .classList.add('dots__dot--active');
+}
+
+function createDots() {
+  slides.forEach((_, index) =>
+    dotContainer.insertAdjacentHTML(
+      'beforeend',
+      `<button class="dots__dot" data-slide="${index}"></button>`
+    )
+  );
+}
+
+function goToSlide(slide) {
+  slides.forEach(
+    (slide, index) =>
+      (slide.style.transform = `translateX(${100 * (index - currentSlide)}%)`)
+  );
+}
+
+function nextSlide() {
+  if (currentSlide === maxSlides - 1) currentSlide = 0;
+  else currentSlide++;
+
+  goToSlide(currentSlide);
+  activateDot(currentSlide);
+}
+
+function prevSlide() {
+  if (currentSlide === 0) currentSlide = maxSlides - 1;
+  else currentSlide--;
+  goToSlide(currentSlide);
+  activateDot(currentSlide);
+}
