@@ -1,5 +1,6 @@
 'use strict';
 
+// #Region Constants
 const modal = document.querySelector('.modal');
 const overlay = document.querySelector('.overlay');
 const btnCloseModal = document.querySelector('.btn--close-modal');
@@ -19,6 +20,14 @@ const headerObserver = new IntersectionObserver(stickyNav, {
   rootMargin: `-${navHeight}px`,
 });
 
+const allSections = document.querySelectorAll('.section');
+const sectionObserver = new IntersectionObserver(revealSection, {
+  root: null,
+  threshold: 0.15,
+});
+// #EndRegion Constants
+
+// #Region Event Listeners
 btnCloseModal.addEventListener('click', closeModal);
 btnsOpenModal.forEach(btn => btn.addEventListener('click', openModal));
 btnScrollTo.addEventListener('click', scrollSectionIntoView);
@@ -30,9 +39,17 @@ document
   .querySelector('.nav__links')
   .addEventListener('click', scrollLinksIntoView);
 tabsContainer.addEventListener('click', switchTabs);
+// #EndRegion Event Listeners
 
+// #Region Methods
 headerObserver.observe(header);
+allSections.forEach(section => {
+  sectionObserver.observe(section);
+  section.classList.add('section--hidden');
+});
+// #EndRegion Methods
 
+// #Region Functions
 function openModal(e) {
   e.preventDefault();
 
@@ -99,3 +116,12 @@ function stickyNav(entries) {
   if (!entry.isIntersecting) nav.classList.add('sticky');
   else nav.classList.remove('sticky');
 }
+
+function revealSection(entries, observer) {
+  const [entry] = entries;
+  if (!entry.isIntersecting) return;
+
+  entry.target.classList.remove('section--hidden');
+  observer.unobserve(entry.target);
+}
+// #EndRegion Functions
